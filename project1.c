@@ -121,7 +121,8 @@ void *thread1()
 			else
 			{
 				trailPtr->next = list1Head;//resetting the node from the freelist to list1's head
-				list1Head = trailPtr;
+				list1Head = trailPtr;//resetting the head of list1
+				trailPtr = NULL;//having trailPtr point to NULL
 			}
 
 			sem_post(&list1);//element has been added to list1. 
@@ -140,6 +141,9 @@ void *thread1()
 
 void *thread2()
 {
+	struct listType *list1Ptr = NULL;
+	struct listType *freelistPtr = NULL;
+
 	while(counter < limit)
 	{
 		sem_wait(&list1);
