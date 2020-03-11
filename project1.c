@@ -8,7 +8,7 @@ void *thread1();
 void *thread2();
 void *thread3();
 pthread_t t1, t2, t3;//threads 
-sem_t freeList, list1, list2, mx, freeBlock; //semaphores
+sem_t freeList, list1, list2, mx; //semaphores
 struct listType
 {
 	struct listType *next;//head of the linked list free list
@@ -28,11 +28,11 @@ int main()
 	//struct listType *freeList = (struct listType *)malloc(sizeof(struct listType));//allocating memory for the free list
 	//struct listType *list1 = (struct listType *)malloc(sizeof(struct listType));//allocating memory for list1
 	//struct listType *list2 = (struct listType *)malloc(sizeof(struct listType));//allocating memory for list2
-	
-	
+
+
 	int i; 
 
-	//creating the linked list for the free list to 5 nodes
+	//creating the linked list for the free list to 8 nodes
 	for(i =0; i < 8; i++)
 	{
 		if(freeHead == NULL)
@@ -50,13 +50,13 @@ int main()
 			freeHead->data = rand() % 100;
 		}
 	}
-	
-	sem_init(&freeList, 0, 8);//initializing the counting semaphore for the free list
-       	sem_init(&list1, 0, 0);//initializing the counting semaphore for list1
+
+	sem_init(&freeList, 0, 7);//initializing the counting semaphore for the free list. 1 less than the number of nodes in the free list
+	//If the count of the semaphore is not 1 less, then the program will segfault in thread2. 
+	sem_init(&list1, 0, 0);//initializing the counting semaphore for list1
 	sem_init(&list2, 0, 0); //initializing the counting semaphore for list2
 	sem_init(&mx, 0, 1);//initializing the binary semaphore for mutual exclusion
-	sem_init(&freeBlock, 0, 0); //initializing the binary semaphore freeblcok, which is used when the free list has 1 node
-		
+
 	//creating the threads
 	pthread_create(&t1, NULL, (void *) &thread1, NULL);
 	pthread_create(&t2, NULL, (void *) &thread2, NULL);
@@ -67,7 +67,7 @@ int main()
 	pthread_join(t1, NULL);
 	pthread_join(t2, NULL);
 	pthread_join(t3, NULL);
-	
+
 
 	//free memory from free list
 	current = freeHead;
@@ -86,7 +86,7 @@ int main()
 		free(list1Head);
 		list1Head = current;
 	}
-	
+
 	//free memory from list2
 	current = list2Head;
 	while(current != NULL)
@@ -95,7 +95,7 @@ int main()
 		free(list2Head);
 		list2Head = current;
 	}
-	
+
 	return 0;
 }
 
@@ -105,36 +105,26 @@ void *thread1()
 	int val; //used to get the semaphore value
 	while(counter < limit)
 	{
-		sem_getvalue(&freeList, &val);//getting the value of the semaphore
-		if(val >1)//if there is more than 1 node in the free list
+		sem_wait(&freeList);
+		sem_wait(&mx);//locking other threads out of the critical section
+		//add to list 1 and take away from free list
+		trailPtr = freeHead;
+		freeHead = freeHead->next; //resetting the head of the freelist to the next node
+		if(list1Head == NULL)
 		{
-			sem_wait(&freeList);
-			sem_wait(&mx);//locking other threads out of the critical section
-			//add to list 1 and take away from free list
-			trailPtr = freeHead;
-			freeHead = freeHead->next; //resetting the head of the freelist to the next node
-			if(list1Head == NULL)
-			{
-				list1Head = trailPtr;
-				trailPtr = NULL;
-			}
-			else
-			{
-				trailPtr->next = list1Head;//resetting the node from the freelist to list1's head
-				list1Head = trailPtr;//resetting the head of list1
-				trailPtr = NULL;//having trailPtr point to NULL
-			}
-
-			sem_post(&list1);//element has been added to list1. 
-			sem_post(&mx);//put any of the threads that are blocked on the ready queue
-			counter ++;
+			list1Head = trailPtr;
+			trailPtr = NULL;
 		}
 		else
 		{
-			sem_post(&mx); //allow another thread to access the critical section
-			sem_wait(&freeBlock);//block this thread until there is more than 1 node in the freelist	
-		
+			trailPtr->next = list1Head;//resetting the node from the freelist to list1's head
+			list1Head = trailPtr;//resetting the head of list1
+			trailPtr = NULL;//having trailPtr point to NULL
 		}
+		counter++;
+		sem_post(&list1);//element has been added to list1. 
+		sem_post(&mx);//put any of the threads that are blocked on the ready queue
+
 	}
 
 }
@@ -148,8 +138,21 @@ void *thread2()
 	{
 		sem_wait(&list1);
 		sem_wait(&mx);
-		//take 
+		//getting the node from list 1 
 
+
+		//getting the node from the free list
+		
+
+		//adding node from list1 to the freelist
+
+
+		//adding node from the freelist to list2
+
+		counter++;
+		sem_post(&list2);//node has been added to list2
+		sem_post(&mx);//allow another thread to access the critical section
+		
 	}
 
 }
@@ -160,6 +163,13 @@ void *thread3()
 	{
 		sem_wait(&list2);
 		sem_wait(&mx);
+
+		//take node from list2 and add it to the free list
+		
+		
+		counter++;
+		sem_post(&freeList); //node has been added to the free list
+		sem_post(&mx); //allow another thread to access the critical section
 
 
 	}
