@@ -139,15 +139,40 @@ void *thread2()
 		sem_wait(&list1);
 		sem_wait(&mx);
 		//getting the node from list 1 
-
+		list1Ptr = list1Head;
+		list1Head = list1Ptr->next;
 
 		//getting the node from the free list
-		
+		freelistPtr = freeHead;
+		freeHead = freelistPtr->next;
 
 		//adding node from list1 to the freelist
-
+		if(list1Head == NULL) //check if inital list is empty
+		{
+			list1Head = list1Ptr;
+			list1Ptr = NULL;
+		}
+		else
+		{
+			list1Ptr->next = freeHead; //reset freelist head to new node from list 1
+			freeHead = list1Ptr; //Set the new freelist head
+			list1Ptr = NULL; //set un-needed pointer to NULL
+		}
+		
 
 		//adding node from the freelist to list2
+		if(list2Head == NULL) //check if inital list is empty
+		{
+			list2Head = freelistPtr;
+			freelistPtr = NULL;
+		}
+		else
+		{
+			freelistPtr->next = list2Head; //reset list 2 head to new node from freelist 
+			list2Head = freelistPtr; //Set the new list 2 head
+			freelistPtr = NULL; //set un-needed pointer to NULL
+		}
+		
 
 		counter++;
 		sem_post(&list2);//node has been added to list2
