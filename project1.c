@@ -33,23 +33,25 @@ int main()
 	int i; 
 
 	//creating the linked list for the free list to 8 nodes
-	for(i =0; i < 8; i++)
-	{
-		if(freeHead == NULL)
-		{
-			struct listType *node = (struct listType *) malloc(sizeof(struct listType));//creating the first node
-			node->next = NULL;
-			freeHead = node;
-			freeHead->data = rand() % 100;//giving the node a randome number 
-		}
-		else
-		{
-			struct listType *node = (struct listType *) malloc(sizeof(struct listType));//creating the first node
-			node->next = NULL;
-			node->next = freeHead;
-			freeHead->data = rand() % 100;
-		}
-	}
+	for( i =0; i < 8; i++)
+        {
+                if(freeHead == NULL)
+                {
+                        struct listType *node = (struct listType *)malloc(sizeof(struct listType));
+                        node->next = NULL;//doing this to prevent uninialtized pointers
+                        freeHead = node;
+                }
+                else
+                {
+                        struct listType *node = (struct listType *)malloc(sizeof(struct listType));
+                        node->next = NULL;
+                        node->next = freeHead;
+                        freeHead = node;
+                }
+
+
+        }
+
 
 	sem_init(&freeList, 0, 7);//initializing the counting semaphore for the free list. 1 less than the number of nodes in the free list
 	//If the count of the semaphore is not 1 less, then the program will segfault in thread2. 
@@ -101,32 +103,43 @@ int main()
 
 void *thread1()
 {
-	struct listType *trailPtr = NULL; //used to have the front of the list go to list1
-	int val; //used to get the semaphore value
-	while(counter < limit)
-	{
-		sem_wait(&freeList);
-		sem_wait(&mx);//locking other threads out of the critical section
-		//add to list 1 and take away from free list
-		trailPtr = freeHead;
-		freeHead = freeHead->next; //resetting the head of the freelist to the next node
-		if(list1Head == NULL)
-		{
-			list1Head = trailPtr;
-			trailPtr = NULL;
-		}
-		else
-		{
-			trailPtr->next = list1Head;//resetting the node from the freelist to list1's head
-			list1Head = trailPtr;//resetting the head of list1
-			trailPtr = NULL;//having trailPtr point to NULL
-		}
-		counter++;
-		sem_post(&list1);//element has been added to list1. 
-		sem_post(&mx);//put any of the threads that are blocked on the ready queue
+	struct listType *current;
+        int val; //used to get the semaphore value
+        struct listType *trailPtr = NULL; //used to have the front of the list go to list1
+        while(counter < limit)
+        {
+                sem_wait(&freeList);
+                sem_wait(&mx);//locking other threads out of the critical section
+                //add to list 1 and take away from free list
 
-	}
+                current = freeHead;
+                printf("Nodes in the free list: ");
+                while(current != NULL)
+                {
+			current->data = rand() %100;//randomizing the data for the node
+                        printf("%d -> ", current->data);//printing the data in the free list
+                        current = current->next;//advancing to the next node
+                }
+                printf("\n");
 
+                if(list1Head == NULL)
+                {
+                        list1Head = freeHead;//setting the head of list1 to the head of the free list
+                        freeHead = freeHead->next;//advancing the free list to the next node
+                        list1Head->next = NULL;//having the next of list1's head be null
+                }
+                else
+                {
+                        trailPtr = freeHead;//setting the trailPtr to the free list's head
+                        freeHead = freeHead->next;//advancing the free list to the next node
+                        trailPtr->next = list1Head;//having the origional freelist head point to the head of list1
+                        list1Head = trailPtr;//resetting the head for list1
+                }
+                trailPtr = NULL;
+                counter++;
+                sem_post(&list1);//element has been added to list1.
+                sem_post(&mx);//put any of the threads that are blocked on the ready queue
+        }	
 }
 
 void *thread2()
