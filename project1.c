@@ -39,6 +39,7 @@ int main()
                 {
                         struct listType *node = (struct listType *)malloc(sizeof(struct listType));
                         node->next = NULL;//doing this to prevent uninialtized pointers
+			node->data = 0;
                         freeHead = node;
                 }
                 else
@@ -116,7 +117,9 @@ void *thread1()
                 printf("Nodes in the free list: ");
                 while(current != NULL)
                 {
-						current->data = rand() %100;//randomizing the data for the node
+			if(current->data ==0)
+				current->data = rand() %100;//randomizing the data for the node
+
                         printf("%d -> ", current->data);//printing the data in the free list
                         current = current->next;//advancing to the next node
                 }
