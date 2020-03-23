@@ -154,7 +154,14 @@ void *thread2()
 	{
 		sem_wait(&list1);
 		sem_wait(&mx);
-
+		list1Ptr = list1Head;
+		printf("Nodes in list 1: ");
+		while(list1Ptr != NULL)
+		{
+			printf("%d -> ", list1Ptr->data);
+			list1Ptr = list1Ptr->next;
+		}
+		printf("\n");
 		//unlink node from list 1 
 		list1Ptr = list1Head;
 		list1Head = list1Ptr->next;
