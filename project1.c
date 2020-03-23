@@ -223,6 +223,28 @@ void *thread3()
 		sem_wait(&list2);
 		sem_wait(&mx);
 
+		// Print list 2
+		printf("Nodes in list 2: ");
+
+		// Set list2Ptr to list2Head
+		list2Ptr = list2Head;
+
+		// Iterates through list 2
+                while(list2Ptr != NULL)
+                {
+			// In case node's data is zero, give it another value
+			if(list2Ptr->data == 0)
+			{
+				list2Ptr->data = rand() % 100; //randomizing the data for the node;
+			}
+
+                        printf("%d -> ", list2Ptr->data); //printing the data in the free list
+
+                        list2Ptr = list2Ptr->next; //advancing to the next node
+                }
+
+                printf("\n");
+
 		//take node from list2 and add it to the free list
 
 		//unlink node from list 2
