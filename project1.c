@@ -113,18 +113,15 @@ void *thread1()
                 sem_wait(&mx);//locking other threads out of the critical section
                 //add to list 1 and take away from free list
 
-				printf("Thread 1:\n");
+		printf("Thread 1:\n");
 
                 current = freeHead;
                 printf("Nodes in the free list: ");
                 while(current != NULL)
                 {
 			if(current->data ==0)
-<<<<<<< HEAD
 				current->data = rand() %100 + 1;//randomizing the data for the node
-=======
-				current->data = rand() %100 +1;//randomizing the data for the node
->>>>>>> bbb651a69f80d178392b9b18fe5ee8f31bef553f
+
 
                         printf("%d -> ", current->data);//printing the data in the free list
                         current = current->next;//advancing to the next node
@@ -160,11 +157,9 @@ void *thread2()
 	{
 		sem_wait(&list1);
 		sem_wait(&mx);
-<<<<<<< HEAD
 
 		printf("Thread 2:\n");
 
-=======
 		list1Ptr = list1Head;
 		printf("Nodes in list 1: ");
 		while(list1Ptr != NULL)
@@ -173,7 +168,7 @@ void *thread2()
 			list1Ptr = list1Ptr->next;
 		}
 		printf("\n");
->>>>>>> bbb651a69f80d178392b9b18fe5ee8f31bef553f
+
 		//unlink node from list 1 
 		list1Ptr = list1Head;
 		list1Head = list1Ptr->next;
@@ -235,9 +230,9 @@ void *thread3()
 		sem_wait(&list2);
 		sem_wait(&mx);
 
-<<<<<<< HEAD
+
 		printf("Thread 3:\n");
-=======
+
 		// Print list 2
 		printf("Nodes in list 2: ");
 
@@ -259,7 +254,6 @@ void *thread3()
                 }
 
                 printf("\n");
->>>>>>> bbb651a69f80d178392b9b18fe5ee8f31bef553f
 
 		//take node from list2 and add it to the free list
 
