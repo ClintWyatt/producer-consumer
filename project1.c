@@ -107,20 +107,20 @@ void *thread1()
 	struct listType *current;
         int val; //used to get the semaphore value
         struct listType *trailPtr = NULL; //used to have the front of the list go to list1
-        while(counter < limit)
+        while(1)
         {
                 sem_wait(&freeList);
                 sem_wait(&mx);//locking other threads out of the critical section
                 //add to list 1 and take away from free list
 
-		printf("Thread 1:\n");
+				printf("Thread 1:\n");
 
                 current = freeHead;
                 printf("Nodes in the free list: ");
                 while(current != NULL)
                 {
-			if(current->data ==0)
-				current->data = rand() %100 + 1;//randomizing the data for the node
+					if(current->data == 0)
+						current->data = rand() %100 + 1;//randomizing the data for the node
 
 
                         printf("%d -> ", current->data);//printing the data in the free list
@@ -153,7 +153,7 @@ void *thread2()
 	struct listType *list1Ptr = NULL;
 	struct listType *freelistPtr = NULL;
 
-	while(counter < limit)
+	while(1)
 	{
 		sem_wait(&list1);
 		sem_wait(&mx);
@@ -180,8 +180,7 @@ void *thread2()
 		freelistPtr->next = NULL;
 
 		//Use list1Ptr(x) to produce freelistPtr(y) data
-		printf("Data before transfer:\n");
-		printf("Node X: %d\tNode Y: %d\n", list1Ptr->data, freelistPtr->data);
+		printf("Freelist Pointer: %d changing to List1 Pointer: %d\n", freelistPtr->data, list1Ptr->data);
 		freelistPtr->data = list1Ptr->data;
 
 
@@ -225,7 +224,7 @@ void *thread3()
 	struct listType *list2Ptr = NULL;
 	struct listType *freelistPtr = NULL;
 
-	while(counter < limit)
+	while(1)
 	{
 		sem_wait(&list2);
 		sem_wait(&mx);
@@ -240,18 +239,18 @@ void *thread3()
 		list2Ptr = list2Head;
 
 		// Iterates through list 2
-                while(list2Ptr != NULL)
-                {
-			// In case node's data is zero, give it another value
-			if(list2Ptr->data == 0)
-			{
-				list2Ptr->data = rand() % 100; //randomizing the data for the node;
-			}
+            while(list2Ptr != NULL)
+            {
+				// In case node's data is zero, give it another value
+				if(list2Ptr->data == 0)
+				{
+					list2Ptr->data = rand() % 100; //randomizing the data for the node;
+				}
 
-                        printf("%d -> ", list2Ptr->data); //printing the data in the free list
+							printf("%d -> ", list2Ptr->data); //printing the data in the free list
 
-                        list2Ptr = list2Ptr->next; //advancing to the next node
-                }
+							list2Ptr = list2Ptr->next; //advancing to the next node
+            }
 
                 printf("\n");
 
