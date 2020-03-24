@@ -118,7 +118,7 @@ void *thread1()
                 while(current != NULL)
                 {
 			if(current->data ==0)
-				current->data = rand() %100;//randomizing the data for the node
+				current->data = rand() %100 +1;//randomizing the data for the node
 
                         printf("%d -> ", current->data);//printing the data in the free list
                         current = current->next;//advancing to the next node
