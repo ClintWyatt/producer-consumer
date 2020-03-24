@@ -120,7 +120,11 @@ void *thread1()
                 while(current != NULL)
                 {
 			if(current->data ==0)
+<<<<<<< HEAD
 				current->data = rand() %100 + 1;//randomizing the data for the node
+=======
+				current->data = rand() %100 +1;//randomizing the data for the node
+>>>>>>> bbb651a69f80d178392b9b18fe5ee8f31bef553f
 
                         printf("%d -> ", current->data);//printing the data in the free list
                         current = current->next;//advancing to the next node
@@ -156,9 +160,20 @@ void *thread2()
 	{
 		sem_wait(&list1);
 		sem_wait(&mx);
+<<<<<<< HEAD
 
 		printf("Thread 2:\n");
 
+=======
+		list1Ptr = list1Head;
+		printf("Nodes in list 1: ");
+		while(list1Ptr != NULL)
+		{
+			printf("%d -> ", list1Ptr->data);
+			list1Ptr = list1Ptr->next;
+		}
+		printf("\n");
+>>>>>>> bbb651a69f80d178392b9b18fe5ee8f31bef553f
 		//unlink node from list 1 
 		list1Ptr = list1Head;
 		list1Head = list1Ptr->next;
@@ -220,7 +235,31 @@ void *thread3()
 		sem_wait(&list2);
 		sem_wait(&mx);
 
+<<<<<<< HEAD
 		printf("Thread 3:\n");
+=======
+		// Print list 2
+		printf("Nodes in list 2: ");
+
+		// Set list2Ptr to list2Head
+		list2Ptr = list2Head;
+
+		// Iterates through list 2
+                while(list2Ptr != NULL)
+                {
+			// In case node's data is zero, give it another value
+			if(list2Ptr->data == 0)
+			{
+				list2Ptr->data = rand() % 100; //randomizing the data for the node;
+			}
+
+                        printf("%d -> ", list2Ptr->data); //printing the data in the free list
+
+                        list2Ptr = list2Ptr->next; //advancing to the next node
+                }
+
+                printf("\n");
+>>>>>>> bbb651a69f80d178392b9b18fe5ee8f31bef553f
 
 		//take node from list2 and add it to the free list
 
