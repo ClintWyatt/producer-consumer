@@ -34,24 +34,24 @@ int main()
 
 	//creating the linked list for the free list to 8 nodes
 	for( i =0; i < 8; i++)
-        {
-                if(freeHead == NULL)
-                {
-                        struct listType *node = (struct listType *)malloc(sizeof(struct listType));
-                        node->next = NULL;//doing this to prevent uninialtized pointers
+	{
+		if(freeHead == NULL)
+		{
+			struct listType *node = (struct listType *)malloc(sizeof(struct listType));
+			node->next = NULL;//doing this to prevent uninialtized pointers
 			node->data = 0;
-                        freeHead = node;
-                }
-                else
-                {
-                        struct listType *node = (struct listType *)malloc(sizeof(struct listType));
-                        node->next = NULL;
-                        node->next = freeHead;
-                        freeHead = node;
-                }
+			freeHead = node;
+		}
+		else
+		{
+			struct listType *node = (struct listType *)malloc(sizeof(struct listType));
+			node->next = NULL;
+			node->next = freeHead;
+			freeHead = node;
+		}
 
 
-        }
+	}
 
 
 	sem_init(&freeList, 0, 7);//initializing the counting semaphore for the free list. 1 less than the number of nodes in the free list
@@ -105,47 +105,47 @@ int main()
 void *thread1()
 {
 	struct listType *current;
-        int val; //used to get the semaphore value
-        struct listType *trailPtr = NULL; //used to have the front of the list go to list1
-        while(1)
-        {
-                sem_wait(&freeList);
-                sem_wait(&mx);//locking other threads out of the critical section
-                //add to list 1 and take away from free list
+	int val; //used to get the semaphore value
+	struct listType *trailPtr = NULL; //used to have the front of the list go to list1
+	while(1)
+	{
+		sem_wait(&freeList);
+		sem_wait(&mx);//locking other threads out of the critical section
+		//add to list 1 and take away from free list
 
-				printf("Thread 1:\n");
+		printf("Thread 1:\n");
 
-                current = freeHead;
-                printf("Nodes in the free list: ");
-                while(current != NULL)
-                {
-					if(current->data == 0)
-						current->data = rand() %100 + 1;//randomizing the data for the node
+		current = freeHead;
+		printf("Nodes in the free list: ");
+		while(current != NULL)
+		{
+			if(current->data == 0)
+				current->data = rand() %100 + 1;//randomizing the data for the node
 
 
-                        printf("%d -> ", current->data);//printing the data in the free list
-                        current = current->next;//advancing to the next node
-                }
-                printf("\n");
+			printf("%d -> ", current->data);//printing the data in the free list
+			current = current->next;//advancing to the next node
+		}
+		printf("\n");
 
-                if(list1Head == NULL)
-                {
-                        list1Head = freeHead;//setting the head of list1 to the head of the free list
-                        freeHead = freeHead->next;//advancing the free list to the next node
-                        list1Head->next = NULL;//having the next of list1's head be null
-                }
-                else
-                {
-                        trailPtr = freeHead;//setting the trailPtr to the free list's head
-                        freeHead = freeHead->next;//advancing the free list to the next node
-                        trailPtr->next = list1Head;//having the original freelist head point to the head of list1
-                        list1Head = trailPtr;//resetting the head for list1
-                }
-                trailPtr = NULL;
-                counter++;
-                sem_post(&list1);//element has been added to list1.
-                sem_post(&mx);//put any of the threads that are blocked on the ready queue
-        }	
+		if(list1Head == NULL)
+		{
+			list1Head = freeHead;//setting the head of list1 to the head of the free list
+			freeHead = freeHead->next;//advancing the free list to the next node
+			list1Head->next = NULL;//having the next of list1's head be null
+		}
+		else
+		{
+			trailPtr = freeHead;//setting the trailPtr to the free list's head
+			freeHead = freeHead->next;//advancing the free list to the next node
+			trailPtr->next = list1Head;//having the original freelist head point to the head of list1
+			list1Head = trailPtr;//resetting the head for list1
+		}
+		trailPtr = NULL;
+		counter++;
+		sem_post(&list1);//element has been added to list1.
+		sem_post(&mx);//put any of the threads that are blocked on the ready queue
+	}	
 }
 
 void *thread2()
@@ -194,7 +194,7 @@ void *thread2()
 			list1Ptr->next = freeHead; //reset freelist head to new node from list 1
 			freeHead = list1Ptr; //Set the new freelist head
 		}
-		
+
 
 		//link node from the freelist to list2
 		if(list2Head == NULL) //check if inital list is empty
@@ -206,7 +206,7 @@ void *thread2()
 			freelistPtr->next = list2Head; //reset list 2 head to new node from freelist 
 			list2Head = freelistPtr; //Set the new list 2 head
 		}
-		
+
 		//set un-needed pointer to NULL
 		list1Ptr = NULL;
 		freelistPtr = NULL;
@@ -214,7 +214,7 @@ void *thread2()
 		counter++;
 		sem_post(&list2);//node has been added to list2
 		sem_post(&mx);//allow another thread to access the critical section
-		
+
 	}
 
 }
@@ -239,20 +239,20 @@ void *thread3()
 		list2Ptr = list2Head;
 
 		// Iterates through list 2
-            while(list2Ptr != NULL)
-            {
-				// In case node's data is zero, give it another value
-				if(list2Ptr->data == 0)
-				{
-					list2Ptr->data = rand() % 100; //randomizing the data for the node;
-				}
+		while(list2Ptr != NULL)
+		{
+			// In case node's data is zero, give it another value
+			if(list2Ptr->data == 0)
+			{
+				list2Ptr->data = rand() % 100; //randomizing the data for the node;
+			}
 
-							printf("%d -> ", list2Ptr->data); //printing the data in the free list
+			printf("%d -> ", list2Ptr->data); //printing the data in the free list
 
-							list2Ptr = list2Ptr->next; //advancing to the next node
-            }
+			list2Ptr = list2Ptr->next; //advancing to the next node
+		}
 
-                printf("\n");
+		printf("\n");
 
 		//take node from list2 and add it to the free list
 
@@ -275,10 +275,10 @@ void *thread3()
 			list2Ptr->next = freeHead;
 			freeHead = list2Ptr;
 		}
-		
+
 		//set un-needed pointer to NULL
 		list2Ptr = NULL;
-		
+
 		counter++;
 		sem_post(&freeList); //node has been added to the free list
 		sem_post(&mx); //allow another thread to access the critical section
