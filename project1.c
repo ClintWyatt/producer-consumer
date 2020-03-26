@@ -15,7 +15,7 @@ struct listType
 	int data;
 };
 int counter =0; //used for the number of loops required for the program
-int limit = 250;
+const int limit = 250;
 struct listType *freeHead = NULL;
 struct listType *list1Head = NULL;
 struct listType *list2Head = NULL;
@@ -45,7 +45,8 @@ int main()
 		else
 		{
 			struct listType *node = (struct listType *)malloc(sizeof(struct listType));
-			node->next = NULL;
+			//node->next = NULL;
+			node->data =0;
 			node->next = freeHead;
 			freeHead = node;
 		}
@@ -63,7 +64,7 @@ int main()
 	//creating the threads
 	pthread_create(&t1, NULL, (void *) &thread1, NULL);
 	pthread_create(&t2, NULL, (void *) &thread2, NULL);
-	pthread_create(&t2, NULL, (void *) &thread3, NULL);
+	pthread_create(&t3, NULL, (void *) &thread3, NULL);
 
 
 	//waiting for threads to finish
@@ -107,7 +108,7 @@ void *thread1()
 	struct listType *current;
 	int val; //used to get the semaphore value
 	struct listType *trailPtr = NULL; //used to have the front of the list go to list1
-	while(1)
+	while(counter < limit)
 	{
 		sem_wait(&freeList);
 		sem_wait(&mx);//locking other threads out of the critical section
@@ -153,7 +154,7 @@ void *thread2()
 	struct listType *list1Ptr = NULL;
 	struct listType *freelistPtr = NULL;
 
-	while(1)
+	while(counter < limit)
 	{
 		sem_wait(&list1);
 		sem_wait(&mx);
@@ -224,7 +225,7 @@ void *thread3()
 	struct listType *list2Ptr = NULL;
 	struct listType *freelistPtr = NULL;
 
-	while(1)
+	while(counter < limit)
 	{
 		sem_wait(&list2);
 		sem_wait(&mx);
