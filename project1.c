@@ -106,9 +106,8 @@ int main()
 void *thread1()
 {
 	struct listType *current;
-	int val; //used to get the semaphore value
 	struct listType *trailPtr = NULL; //used to have the front of the list go to list1
-	while(counter < limit)
+	while(1)
 	{
 		sem_wait(&freeList);
 		sem_wait(&mx);//locking other threads out of the critical section
@@ -143,7 +142,6 @@ void *thread1()
 			list1Head = trailPtr;//resetting the head for list1
 		}
 		trailPtr = NULL;
-		counter++;
 		sem_post(&list1);//element has been added to list1.
 		sem_post(&mx);//put any of the threads that are blocked on the ready queue
 	}	
@@ -154,7 +152,7 @@ void *thread2()
 	struct listType *list1Ptr = NULL;
 	struct listType *freelistPtr = NULL;
 
-	while(counter < limit)
+	while(1)
 	{
 		sem_wait(&list1);
 		sem_wait(&mx);
@@ -211,8 +209,6 @@ void *thread2()
 		//set un-needed pointer to NULL
 		list1Ptr = NULL;
 		freelistPtr = NULL;
-
-		counter++;
 		sem_post(&list2);//node has been added to list2
 		sem_post(&mx);//allow another thread to access the critical section
 
@@ -225,7 +221,7 @@ void *thread3()
 	struct listType *list2Ptr = NULL;
 	struct listType *freelistPtr = NULL;
 
-	while(counter < limit)
+	while(1)
 	{
 		sem_wait(&list2);
 		sem_wait(&mx);
@@ -279,8 +275,6 @@ void *thread3()
 
 		//set un-needed pointer to NULL
 		list2Ptr = NULL;
-
-		counter++;
 		sem_post(&freeList); //node has been added to the free list
 		sem_post(&mx); //allow another thread to access the critical section
 
